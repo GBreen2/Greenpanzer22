@@ -2,14 +2,14 @@
   "version": 2,
   "builds": [
     {
-      "src": "Green.py",
+      "src": "green.py",
       "use": "@vercel/python"
     }
   ],
   "routes": [
     {
       "src": "/",
-      "dest": "/Green.py"
+      "dest": "/green.py"
     }
   ],
   "postinstall": {
