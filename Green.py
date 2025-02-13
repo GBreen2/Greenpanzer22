@@ -1,13 +1,18 @@
+import os
 import requests
 from telegram import Bot
 from telegram.ext import Application, CommandHandler, MessageHandler, filters
 import re
+from fastapi import FastAPI
+from starlette.requests import Request
+import asyncio
 
-# YouTube API Key
-YOUTUBE_API_KEY = 'AIzaSyBLJlVmrVnTu4JYUwltLuqtji65EyxdP5s'
+# YouTube API Key and Telegram Bot API Token as environment variables
+YOUTUBE_API_KEY = os.getenv('YOUTUBE_API_KEY')
+TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 
-# Telegram Bot API Token
-TELEGRAM_BOT_TOKEN = '7652906604:AAG4JGjSy0TTMkr0V0xlSxGMi7aQtJA_2io'
+# FastAPI instance for Vercel to handle HTTP requests
+app = FastAPI()
 
 # YouTube Data API Endpoint for Video Information
 async def get_youtube_video_info(video_url):
@@ -103,5 +108,14 @@ def setup_bot():
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     application.run_polling()
 
-if __name__ == '__main__':
-    setup_bot()
+# HTTP endpoint for Vercel
+@app.get("/")
+async def root(request: Request):
+    return {"message": "Hello, welcome to the YouTube Stats Bot!"}
+
+# Vercel entry point
+@app.on_event("startup")
+async def on_startup():
+    # Run the bot in a background task when the app starts
+    loop = asyncio.get_event_loop()
+    loop.create_task(setup_bot())
